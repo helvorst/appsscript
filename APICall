@@ -1,0 +1,23 @@
+function myFunction() {
+  // Make a POST request with form data.
+  var resumeBlob = Utilities.newBlob('Hire me!', 'text/plain', 'resume.txt');
+  var formData = {
+    'subject': 'Test from Ishtar',
+    'htmlBody': '<h1>hello, <span style="color:red">world</span></h1>',
+    'file': resumeBlob
+  };
+  // Because payload is a JavaScript object, it will be interpreted as
+  // as form data. (No need to specify contentType; it will automatically
+  // default to either 'application/x-www-form-urlencoded'
+  // or 'multipart/form-data')
+  var options = {
+    headers: {
+      Authorization: 'Bearer ' + getService().getAccessToken(),
+    },
+//    'method' : 'post',
+//    'payload' : formData
+  };
+  var url = "http://127.0.0.1:8080/send4"; ;
+  var resp = UrlFetchApp.fetch(url /*+ '?to=vorst.hel@gmail.com&toName=Hel&type=multipart'*/, options);
+  Logger.log(resp);
+}
