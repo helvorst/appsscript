@@ -1,0 +1,26 @@
+function topic() {
+  var pss = getService("PubSub", "https://www.googleapis.com/auth/pubsub");
+  
+  var body = {
+    "messages": [
+      {
+        "data": Utilities.base64Encode("Hello"),
+      }
+    ]
+  }
+  
+  var options = {
+    "contentType" : "application/json",
+    headers: {
+      Authorization: 'Bearer ' + pss.getAccessToken(),
+    },
+    'method' : 'post',
+     payload : JSON.stringify(body)
+  };
+
+  var url = "https://pubsub.googleapis.com/v1/projects/ishtar-217514/topics/email:publish";
+  Logger.log('url' + url);
+  var resp = UrlFetchApp.fetch(url, options);
+  var msg = JSON.parse(resp.getContentText());
+  Logger.log(msg);
+}
