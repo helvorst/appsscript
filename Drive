@@ -1,0 +1,129 @@
+// MIME-TYPES: https://developers.google.com/drive/api/v3/mime-types
+// API: https://developers.google.com/drive/api/v3/reference/files/create
+// copied from: https://developers.google.com/drive/api/v2/reference/files/insert#examples
+
+
+//!!! Both calls to DRive API fail here and there for "Internal reason" 
+
+// simple upload
+function createFile() {
+  var service = getService("Drive", "https://www.googleapis.com/auth/drive");
+  
+  Logger.log('access:' + service.hasAccess());
+  Logger.log('token:' + service.getAccessToken());  
+  
+  //var blob = Utilities.newBlob('Hire me!', 'text/plain', 'resume.txt');
+  var text = "Hello!";
+  
+  //mimeType = "application/vnd.google-apps.document" / 'application/octet-stream' / 'text/plain',
+  
+  
+  const boundary = '-------314159265358979323846';
+  const delimiter = "\r\n--" + boundary + "\r\n";
+  const close_delim = "\r\n--" + boundary + "--";
+  
+  var base64Data = Utilities.base64Encode(text);
+  
+  var contentType = 'text/plain';
+  
+  var metadata = {
+      name: "Resume",
+      mimeType: "application/vnd.google-apps.document",
+  };
+  
+  var multipartRequestBody =
+      delimiter +
+        'Content-Type: application/json\r\n\r\n' +
+          JSON.stringify(metadata) +
+            delimiter +
+              'Content-Type: ' + contentType + '\r\n' +
+                'Content-Transfer-Encoding: base64\r\n' +
+                  '\r\n' +
+                    base64Data +
+                      close_delim;
+  
+  var options = {
+    contentType: 'multipart/mixed; boundary="' + boundary + '"', //"application/json",
+    headers: {
+      Authorization: 'Bearer ' + service.getAccessToken()     
+    },
+    method : 'post',
+    payload : multipartRequestBody,
+  };
+  var url = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart";
+  
+  var resp = UrlFetchApp.fetch(url, options);
+  
+  var file = resp.getContentText();
+  Logger.log(file);
+  shareFile(JSON.parse(file).id)
+  
+}
+
+
+function shareFile(id) {
+  var service = getService("Drive", "https://www.googleapis.com/auth/drive");
+
+  
+  var urlPerm = "https://www.googleapis.com/drive/v3/files/" + id + "/permissions";
+  
+  var body = {
+      role: "writer",
+      type: "user",
+      emailAddress: "vorst.hel@gmail.com"
+  }
+  
+  var options = {
+    contentType: "application/json",
+    headers: {
+      Authorization: 'Bearer ' + service.getAccessToken(),
+    },
+    method : 'post',
+    payload : JSON.stringify(body),
+    
+  };
+  var resp = UrlFetchApp.fetch(urlPerm, options);
+  Logger.log(resp.getContentText());
+}
+
+
+//function aboutFolder() {
+//  var url = "https://www.googleapis.com/drive/v3/about?fields=user";
+//  var options = {
+//    headers: {
+//      Authorization: 'Bearer ' + getService().getAccessToken()
+//    }
+//  }
+//  var resp = UrlFetchApp.fetch(url, options);
+//  var file = resp.getContentText();
+//  Logger.log(file);
+//  shareFile(JSON.parse(file).id)
+//}
+
+
+
+//function getFile() {
+//  var id = "1DIy2Oii9CGgwb6aPY7LkhM3gdLbea0sg";
+//  var url = "https://www.googleapis.com/drive/v3/files/" + id;
+//  var options = {
+//    headers: {
+//      Authorization: 'Bearer ' + getService().getAccessToken()
+//    }
+//  }
+//  var resp = UrlFetchApp.fetch(url, options);
+//  Logger.log(resp.getContentText());
+//  
+//}
+
+
+
+//function listFiles() {
+//  var url = "https://www.googleapis.com/drive/v3/files";
+//  var options = {
+//    headers: {
+//      Authorization: 'Bearer ' + getService().getAccessToken()
+//    }
+//  }
+//  var resp = UrlFetchApp.fetch(url, options);
+//  Logger.log(resp.getContentText());
+//}
